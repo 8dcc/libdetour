@@ -13,7 +13,7 @@
 #define PAGE_ALIGN_DOWN(x) (PAGE_ALIGN(x) - PAGE_SIZE)
 
 static bool protect_addr(void* ptr, int new_flags) {
-    void* p  = (void*)PAGE_ALIGN_DOWN((uint32_t)ptr);
+    void* p  = (void*)PAGE_ALIGN_DOWN((detour_ptr_t)ptr);
     int pgsz = getpagesize();
 
     if (mprotect(p, pgsz, new_flags) == -1)
@@ -32,8 +32,14 @@ static bool protect_addr(void* ptr, int new_flags) {
  *   0:  b8 01 00 00 00          mov    eax,0x1
  *   5:  ff e0                   jmp    eax
  */
-static uint8_t def_jmp_bytes[JMP_SZ] = { 0xB8, 0x00, 0x00, 0x00,
-                                         0x00, 0xFF, 0xE0 };
+#ifdef __i386__
+static uint8_t def_jmp_bytes[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
+#define JMP_BYTES_PTR 1 /* Offset inside the array where the ptr should go */
+#else
+static uint8_t def_jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
+                                   0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
+#define JMP_BYTES_PTR 2 /* Offset inside the array where the ptr should go */
+#endif
 
 void detour_init(detour_data_t* data, void* orig, void* hook) {
     data->detoured = false;
@@ -47,11 +53,11 @@ void detour_init(detour_data_t* data, void* orig, void* hook) {
     /* Default jmp bytes */
     memcpy(data->jmp_bytes, &def_jmp_bytes, sizeof(def_jmp_bytes));
 
-    /* Location where the hook address is going to be inside jmp_bytes. Would
-     * be [2] and sizeof(uint64_t) for x64.
-     * We use "&hook" and not "hook" because we want the address of the func,
-     * not the first bytes of it like before. */
-    memcpy(&data->jmp_bytes[1], &hook, sizeof(uint32_t));
+    /* JMP_BYTES_PTR is defined bellow def_jmp_bytes, and it changes depending
+     * on the arch.
+     * We use "&hook" and not "hook" because we want the address of
+     * the func, not the first bytes of it like before. */
+    memcpy(&data->jmp_bytes[JMP_BYTES_PTR], &hook, sizeof(detour_ptr_t));
 }
 
 bool detour_add(detour_data_t* d) {

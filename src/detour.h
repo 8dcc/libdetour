@@ -1,14 +1,20 @@
 #ifndef DETOUR_H_
 #define DETOUR_H_
 
-#define JMP_SZ 7
+#ifdef __i386__
+typedef uint32_t detour_ptr_t;
+#define JMP_SZ_ 7 /* Size of jmp instructions in 32bit */
+#else
+typedef uint64_t detour_ptr_t;
+#define JMP_SZ_ 12 /* Size of jmp instructions in 64bit */
+#endif
 
 typedef struct {
     bool detoured;
     void* orig;
     void* hook;
-    uint8_t jmp_bytes[JMP_SZ];
-    uint8_t saved_bytes[JMP_SZ];
+    uint8_t jmp_bytes[JMP_SZ_];
+    uint8_t saved_bytes[JMP_SZ_];
 } detour_data_t;
 
 /*----------------------------------------------------------------------------*/
