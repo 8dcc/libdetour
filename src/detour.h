@@ -34,14 +34,18 @@ bool detour_del(detour_data_t* d);
 /*----------------------------------------------------------------------------*/
 
 /* Declare the type for the original function */
-#define DECL_DETOUR_TYPE(funcRet, funcName, ...) \
-    typedef funcRet (*funcName##_t)(__VA_ARGS__);
+#define DECL_DETOUR_TYPE(funcRet, newTypeName, ...) \
+    typedef funcRet (*newTypeName##_t)(__VA_ARGS__);
 
-/* Reset original bytes, call original, detour again. detourData is NOT a ptr */
-#define CALL_ORIGINAL(detourData, funcName, ...)      \
+/* Reset original bytes, call original, detour again.
+ * Keep in mind that:
+ *   - detourData is NOT a pointer, it expects the full struct
+ *   - funcType should be the same name passed to DECL_DETOUR_TYPE, without the
+ *     ending added by the macro ("_t") */
+#define CALL_ORIGINAL(detourData, funcType, ...)      \
     {                                                 \
         detour_del(&detourData);                      \
-        ((funcName##_t)detourData.orig)(__VA_ARGS__); \
+        ((funcType##_t)detourData.orig)(__VA_ARGS__); \
         detour_add(&detourData);                      \
     }
 
