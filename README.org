@@ -4,14 +4,16 @@
 #+export_file_name: ./doc/README.md
 #+author: 8dcc
 
-*Simple library for detour hooking in C.*
+*Simple linux library for detour hooking in C.*
 
 #+TOC: headlines 2
 
 * Description
-To use in your project, simply add the detour source and headers and compile
-them with the rest of your code. Please see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]] for an example on how to
-use it.
+This is a linux library, and it supports x64 and x86.
+
+If you want to use this library, simply copy the detour source and headers
+to your project, include the header in your source files and compile it with the
+rest of your code. Please see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]] for an example on how to use it.
 
 This library was originally made for [[https://github.com/8dcc/hl-cheat][8dcc/hl-cheat]].
 
