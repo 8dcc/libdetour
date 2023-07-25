@@ -1,3 +1,10 @@
+/**
+ * @file      detour.c
+ * @brief     Detour hooking library source
+ * @author    8dcc
+ *
+ * https://github.com/8dcc/detour-lib
+ */
 
 #include <stdint.h>
 #include <stdbool.h>

@@ -1,3 +1,11 @@
+/**
+ * @file      detour.h
+ * @brief     Detour hooking library header
+ * @author    8dcc
+ *
+ * https://github.com/8dcc/detour-lib
+ */
+
 #ifndef DETOUR_H_
 #define DETOUR_H_
 
@@ -37,4 +45,4 @@ bool detour_del(detour_data_t* d);
         detour_add(&detourData);                      \
     }
 
-#endif    // DETOUR_H_
+#endif /* DETOUR_H_ */
