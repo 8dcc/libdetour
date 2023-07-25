@@ -1,12 +1,12 @@
 
 CC=gcc
-CFLAGS=-Wall -Wextra -m32
+CFLAGS=-Wall -Wextra
 LDFLAGS=
 
 OBJS=obj/main.c.o obj/detour.c.o
 BIN=detour-test.out
 
-.PHONY: clean all run
+.PHONY: clean all run flags-32bit all-32bit
 
 # -------------------------------------------
 
@@ -18,6 +18,12 @@ run: $(BIN)
 clean:
 	rm -f $(OBJS)
 	rm -f $(BIN)
+
+# Add -m32 for x86 systems stuff
+flags-32bit:
+	$(eval CFLAGS += -m32)
+
+all-32bit: flags-32bit all
 
 # -------------------------------------------
 
