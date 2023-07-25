@@ -10,8 +10,9 @@
 #include "detour.h"
 
 /* Here we asociate the return type and arguments for the function "foo". This
- * macro will create the type "foo_t", that will be used by CALL_ORIGINAL() */
-DECL_DETOUR_TYPE(bool, foo, double, double);
+ * macro will create the type "foo_type_t", that will be used by the
+ * CALL_ORIGINAL() macro from the hook. */
+DECL_DETOUR_TYPE(bool, foo_type, double, double);
 
 /* We declare the detour data struct global so it's accesible from our hook */
 detour_data_t detour_data;
@@ -27,8 +28,8 @@ bool foo(double a, double b) {
 void hook(double a, double b) {
     printf("hook: %f, %f\n", a, b);
 
-    /* We call the original function at the end of our hook */
-    CALL_ORIGINAL(detour_data, foo, a, b);
+    /* We call the original function at the end of our hook, with its type */
+    CALL_ORIGINAL(detour_data, foo_type, a, b);
 }
 
 int main() {
