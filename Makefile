@@ -1,11 +1,10 @@
 
 CC=gcc
-CFLAGS=-Wall -Wextra
+CFLAGS=-Wall -Wextra -m32
 LDFLAGS=
 
-# TODO: Add object files and rename
-OBJS=obj/main.c.o
-BIN=output.out
+OBJS=obj/main.c.o obj/detour.c.o
+BIN=detour-test.out
 
 .PHONY: clean all run
 
