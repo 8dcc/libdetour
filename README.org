@@ -4,32 +4,21 @@
 #+export_file_name: ./doc/README.md
 #+author: 8dcc
 
-#+begin_comment
-*TODO*: Change project-name and title
-*TODO*: Change project name for Doxygen
-*TODO*: Change output.out in Makefile
-*TODO*: Export README.org to markdown for Doxygen
-#+end_comment
-
-*Short description.*
+*Simple library for detour hooking in C for x86.*
 
 #+TOC: headlines 2
 
 * Description
-Long description.
+To use in your project, simply add the detour source and headers and compile them with the rest of your code.
+
+Made this for [[https://github.com/8dcc/hl-cheat][8dcc/hl-cheat]].
 
 * Building
 
 #+begin_src console
-$ git clone https://github.com/8dcc/project-name
-$ cd project-name
+$ git clone https://github.com/8dcc/32bit-detour
+$ cd 32bit-detour
 $ make
 ...
 #+end_src
 
-* Usage
-
-#+begin_src console
-$ ./project-name.out --help
-...
-#+end_src
