@@ -26,3 +26,66 @@ $ make
 ...
 #+end_src
 
+* Usage
+
+First of all, you will need to declare the type of the original function with
+the =DECL_DETOUR_TYPE()= macro. You will also need to declare a =detour_data_t=
+struct:
+
+#+begin_src c
+/* int orig(double a, double b); */
+DECL_DETOUR_TYPE(int, orig, double, double);
+
+detour_data_t detour_data;
+#+end_src
+
+In this case, the macro will =typedef= a =orig_t= type.
+
+#+begin_quote
+*Note:* Make sure these 2 symbols (=orig_t= and =detour_data=) are accessible from your
+hook function (i.e. make them global)
+#+end_quote
+
+Once you have done that, initialize the =detour_data_t= struct by calling
+=detour_init()= with the original and hook pointers, and enable the detour:
+
+#+begin_src c
+/* Initialize detour_data struct */
+detour_init(&detour_data, orig_ptr, hook_ptr);
+
+/* Detour hook the original function */
+detour_add(&detour_data);
+#+end_src
+
+If you want to call the original from your hook, you can use the =CALL_ORIGINAL()=
+or the =GET_ORIGINAL()= macros (depends on whether you care about the return
+value):
+
+#+begin_src c
+void hook(double p1, double p2) {
+    /* ... */
+
+    /* We care about returned value */
+    int result;
+    GET_ORIGINAL(detour_data, result, orig_type, p1, p2);
+
+    /* We don't care about the returned value */
+    CALL_ORIGINAL(detour_data, orig_type, p1, p2);
+}
+#+end_src
+
+Once we are done hooking, and we want to restore the original function, we can
+call =detour_del()=:
+
+#+begin_src c
+detour_del(&detour_data);
+#+end_src
+
+If we call =orig()= again, our hook function will not be called.
+
+#+begin_quote
+*Note:* The =CALL_ORIGINAL()= macros just remove the patched bytes, call the original
+and then patch them again.
+#+end_quote
+
+For a full working example, see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]]. You can also run =make= or =make all-32bit=.
