@@ -10,10 +10,8 @@
 #define DETOUR_H_ 1
 
 #ifdef __i386__
-typedef uint32_t detour_ptr_t;
 #define JMP_SZ_ 7 /* Size of jmp instructions in 32bit */
 #else
-typedef uint64_t detour_ptr_t;
 #define JMP_SZ_ 12 /* Size of jmp instructions in 64bit */
 #endif
 

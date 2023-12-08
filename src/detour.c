@@ -16,14 +16,14 @@
 #include "detour.h"
 
 #define PAGE_MASK          (~(PAGE_SIZE - 1))
-#define PAGE_ALIGN(x)      ((x + PAGE_SIZE - 1) & PAGE_MASK)
-#define PAGE_ALIGN_DOWN(x) (PAGE_ALIGN(x) - PAGE_SIZE)
+#define PAGE_ALIGN(X)      (((uintptr_t)(X) + PAGE_SIZE - 1) & PAGE_MASK)
+#define PAGE_ALIGN_DOWN(X) (PAGE_ALIGN(X) - PAGE_SIZE)
 
 static bool protect_addr(void* ptr, int new_flags) {
-    const int PAGE_SIZE = getpagesize();
-    void* p  = (void*)PAGE_ALIGN_DOWN((detour_ptr_t)ptr);
+    int PAGE_SIZE = getpagesize();
+    void* page    = (void*)PAGE_ALIGN_DOWN(ptr);
 
-    if (mprotect(p, PAGE_SIZE, new_flags) == -1)
+    if (mprotect(page, PAGE_SIZE, new_flags) == -1)
         return false;
 
     return true;
@@ -64,7 +64,7 @@ void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
      * on the arch.
      * We use "&hook" and not "hook" because we want the address of
      * the func, not the first bytes of it like before. */
-    memcpy(&ctx->jmp_bytes[JMP_BYTES_OFF], &hook, sizeof(detour_ptr_t));
+    memcpy(&ctx->jmp_bytes[JMP_BYTES_OFF], &hook, sizeof(void*));
 }
 
 bool detour_add(detour_ctx_t* ctx) {
