@@ -17,7 +17,7 @@ It supports x64 and x86.
 
 If you want to use this library, simply copy the detour source and headers to
 your project, include the header in your source files and compile the detour
-source with the rest of your code. Please see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]] and for an [[*Usage][Usage]]
+source with the rest of your code. Please see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]] and [[*Usage][Usage]] for an
 example on how to use it.
 
 This library was originally made for [[https://github.com/8dcc/hl-cheat][8dcc/hl-cheat]], and was inspired by
@@ -46,8 +46,8 @@ detour_ctx_t detour_ctx;
 #+end_src
 
 This macro will =typedef= a type needed internally by the library, so make sure
-you call it globally. The context struct be accesible when calling the original
-function (e.g. from your hook), so keep that in mind as well.
+you call it globally. The context struct should be accesible when calling the
+original function (e.g. from your hook), so keep that in mind as well.
 
 Then, initialize the context struct by calling =detour_init= with a pointer to the
 original function and a pointer to your hook function:
@@ -75,11 +75,11 @@ double hook(double a, double b) {
     DETOUR_ORIG_CALL(&detour_ctx, orig, a, b);
 
     /* Store return value in variable */
-    int result;
+    double result;
     DETOUR_ORIG_GET(&detour_ctx, result, orig, a, b);
 
     /* Our hook can overwrite the return value */
-    return 123;
+    return 123.0;
 }
 #+end_src
 

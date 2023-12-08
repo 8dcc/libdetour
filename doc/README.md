@@ -3,12 +3,12 @@
 
 # Table of Contents
 
-1.  [Description](#org04ad219)
-2.  [Building](#org3f0b275)
-3.  [Usage](#org7a323ba)
+1.  [Description](#orgc9b6157)
+2.  [Building](#org77a36eb)
+3.  [Usage](#org95ca380)
 
 
-<a id="org04ad219"></a>
+<a id="orgc9b6157"></a>
 
 # Description
 
@@ -19,14 +19,14 @@ It supports x64 and x86.
 
 If you want to use this library, simply copy the detour source and headers to
 your project, include the header in your source files and compile the detour
-source with the rest of your code. Please see [src/main.c](https://github.com/8dcc/detour-lib/blob/main/src/main.c) and for an [Usage](#org7a323ba)
+source with the rest of your code. Please see [src/main.c](https://github.com/8dcc/detour-lib/blob/main/src/main.c) and [Usage](#org95ca380) for an
 example on how to use it.
 
 This library was originally made for [8dcc/hl-cheat](https://github.com/8dcc/hl-cheat), and was inspired by
 [this OOP abomination](https://guidedhacking.com/threads/simple-linux-windows-detour-class.10580/) ([mirror](https://gist.github.com/8dcc/d0cbef32cd46ab9c73c6f830fa71d999)).
 
 
-<a id="org3f0b275"></a>
+<a id="org77a36eb"></a>
 
 # Building
 
@@ -36,7 +36,7 @@ This library was originally made for [8dcc/hl-cheat](https://github.com/8dcc/hl-
     ...
 
 
-<a id="org7a323ba"></a>
+<a id="org95ca380"></a>
 
 # Usage
 
@@ -50,8 +50,8 @@ context struct:
     detour_ctx_t detour_ctx;
 
 This macro will `typedef` a type needed internally by the library, so make sure
-you call it globally. The context struct be accesible when calling the original
-function (e.g. from your hook), so keep that in mind as well.
+you call it globally. The context struct should be accesible when calling the
+original function (e.g. from your hook), so keep that in mind as well.
 
 Then, initialize the context struct by calling `detour_init` with a pointer to the
 original function and a pointer to your hook function:
@@ -76,11 +76,11 @@ following macros:
         DETOUR_ORIG_CALL(&detour_ctx, orig, a, b);
     
         /* Store return value in variable */
-        int result;
+        double result;
         DETOUR_ORIG_GET(&detour_ctx, result, orig, a, b);
     
         /* Our hook can overwrite the return value */
-        return 123;
+        return 123.0;
     }
 
 Once we are done, we can call `detour_del` to remove the hook:
