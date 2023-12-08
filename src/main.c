@@ -23,7 +23,7 @@ double foo(double a, double b) {
 }
 
 /* Our hook, the function that we want to be called instead of foo() */
-void hook(double a, double b) {
+double hook(double a, double b) {
     printf("hook: got values %.1f and %.1f\n", a, b);
 
     printf("hook: calling original with custom values...\n");
@@ -39,9 +39,13 @@ void hook(double a, double b) {
     DETOUR_ORIG_GET(&detour_ctx, my_var, foo, a, b);
 
     printf("hook: original returned %.1f\n", my_var);
+
+    printf("hook: returning custom value...\n");
+    return 420.0;
 }
 
 int main(void) {
+    double returned;
     void* orig_ptr = &foo;
     void* hook_ptr = &hook;
 
@@ -54,7 +58,8 @@ int main(void) {
     printf("main: hooked, calling foo...\n");
 
     /* Call the original function to test */
-    foo(5.0, 2.0);
+    returned = foo(5.0, 2.0);
+    printf("main: hooked foo returned %.1f\n\n", returned);
 
     /* Once we are done, we can remove the hook */
     detour_del(&detour_ctx);
@@ -62,7 +67,8 @@ int main(void) {
     printf("main: unhooked, calling again...\n");
 
     /* Hook is not called anymore */
-    foo(11.0, 3.0);
+    returned = foo(11.0, 3.0);
+    printf("main: unhooked foo returned %.1f\n", returned);
 
     return 0;
 }
