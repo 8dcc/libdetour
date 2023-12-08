@@ -48,61 +48,61 @@ static uint8_t def_jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
 #define JMP_BYTES_PTR 2 /* Offset inside the array where the ptr should go */
 #endif
 
-void detour_init(detour_data_t* data, void* orig, void* hook) {
-    data->detoured = false;
-    data->orig     = orig;
-    data->hook     = hook;
+void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
+    ctx->detoured = false;
+    ctx->orig     = orig;
+    ctx->hook     = hook;
 
     /* Store the first N bytes of the original function, where N is the size of
      * the jmp instructions */
-    memcpy(data->saved_bytes, orig, sizeof(data->saved_bytes));
+    memcpy(ctx->saved_bytes, orig, sizeof(ctx->saved_bytes));
 
     /* Default jmp bytes */
-    memcpy(data->jmp_bytes, &def_jmp_bytes, sizeof(def_jmp_bytes));
+    memcpy(ctx->jmp_bytes, &def_jmp_bytes, sizeof(def_jmp_bytes));
 
     /* JMP_BYTES_PTR is defined bellow def_jmp_bytes, and it changes depending
      * on the arch.
      * We use "&hook" and not "hook" because we want the address of
      * the func, not the first bytes of it like before. */
-    memcpy(&data->jmp_bytes[JMP_BYTES_PTR], &hook, sizeof(detour_ptr_t));
+    memcpy(&ctx->jmp_bytes[JMP_BYTES_PTR], &hook, sizeof(detour_ptr_t));
 }
 
-bool detour_add(detour_data_t* d) {
+bool detour_add(detour_ctx_t* ctx) {
     /* Already detoured, nothing to do */
-    if (d->detoured)
+    if (ctx->detoured)
         return true;
 
     /* See util.c */
-    if (!protect_addr(d->orig, PROT_READ | PROT_WRITE | PROT_EXEC))
+    if (!protect_addr(ctx->orig, PROT_READ | PROT_WRITE | PROT_EXEC))
         return false;
 
     /* Copy our jmp instruction with our hook address to the orig */
-    memcpy(d->orig, d->jmp_bytes, sizeof(d->jmp_bytes));
+    memcpy(ctx->orig, ctx->jmp_bytes, sizeof(ctx->jmp_bytes));
 
     /* Restore old protection */
-    if (protect_addr(d->orig, PROT_READ | PROT_EXEC)) {
-        d->detoured = true;
+    if (protect_addr(ctx->orig, PROT_READ | PROT_EXEC)) {
+        ctx->detoured = true;
         return true;
     }
 
     return false;
 }
 
-bool detour_del(detour_data_t* d) {
+bool detour_del(detour_ctx_t* ctx) {
     /* Not detoured, nothing to do */
-    if (!d->detoured)
+    if (!ctx->detoured)
         return true;
 
     /* See util.c */
-    if (!protect_addr(d->orig, PROT_READ | PROT_WRITE | PROT_EXEC))
+    if (!protect_addr(ctx->orig, PROT_READ | PROT_WRITE | PROT_EXEC))
         return false;
 
     /* Restore the bytes that were at the start of orig (we saved on init) */
-    memcpy(d->orig, d->saved_bytes, sizeof(d->saved_bytes));
+    memcpy(ctx->orig, ctx->saved_bytes, sizeof(ctx->saved_bytes));
 
     /* Restore old protection */
-    if (protect_addr(d->orig, PROT_READ | PROT_EXEC)) {
-        d->detoured = false;
+    if (protect_addr(ctx->orig, PROT_READ | PROT_EXEC)) {
+        ctx->detoured = false;
         return true;
     }
 
