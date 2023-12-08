@@ -3,12 +3,12 @@
 
 # Table of Contents
 
-1.  [Description](#orgc302a32)
-2.  [Building](#orgb606716)
-3.  [Usage](#org1418a31)
+1.  [Description](#org04ad219)
+2.  [Building](#org3f0b275)
+3.  [Usage](#org7a323ba)
 
 
-<a id="orgc302a32"></a>
+<a id="org04ad219"></a>
 
 # Description
 
@@ -19,14 +19,14 @@ It supports x64 and x86.
 
 If you want to use this library, simply copy the detour source and headers to
 your project, include the header in your source files and compile the detour
-source with the rest of your code. Please see [src/main.c](https://github.com/8dcc/detour-lib/blob/main/src/main.c) and for an [Usage](#org1418a31)
+source with the rest of your code. Please see [src/main.c](https://github.com/8dcc/detour-lib/blob/main/src/main.c) and for an [Usage](#org7a323ba)
 example on how to use it.
 
 This library was originally made for [8dcc/hl-cheat](https://github.com/8dcc/hl-cheat), and was inspired by
 [this OOP abomination](https://guidedhacking.com/threads/simple-linux-windows-detour-class.10580/) ([mirror](https://gist.github.com/8dcc/d0cbef32cd46ab9c73c6f830fa71d999)).
 
 
-<a id="orgb606716"></a>
+<a id="org3f0b275"></a>
 
 # Building
 
@@ -36,7 +36,7 @@ This library was originally made for [8dcc/hl-cheat](https://github.com/8dcc/hl-
     ...
 
 
-<a id="org1418a31"></a>
+<a id="org7a323ba"></a>
 
 # Usage
 
@@ -45,7 +45,7 @@ with the `DETOUR_DECL_TYPE` macro. You will also need to declare a `detour_ctx_t
 context struct:
 
     /* int orig(double a, double b); */
-    DECL_DETOUR_TYPE(int, orig, double, double);
+    DETOUR_DECL_TYPE(int, orig, double, double);
     
     detour_ctx_t detour_ctx;
 
@@ -73,11 +73,11 @@ following macros:
 
     double hook(double a, double b) {
         /* Call original ignoring return */
-        CALL_ORIGINAL(&detour_ctx, orig, a, b);
+        DETOUR_ORIG_CALL(&detour_ctx, orig, a, b);
     
         /* Store return value in variable */
         int result;
-        GET_ORIGINAL(&detour_ctx, result, orig, a, b);
+        DETOUR_ORIG_GET(&detour_ctx, result, orig, a, b);
     
         /* Our hook can overwrite the return value */
         return 123;

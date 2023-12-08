@@ -40,7 +40,7 @@ context struct:
 
 #+begin_src C
 /* int orig(double a, double b); */
-DECL_DETOUR_TYPE(int, orig, double, double);
+DETOUR_DECL_TYPE(int, orig, double, double);
 
 detour_ctx_t detour_ctx;
 #+end_src
@@ -72,11 +72,11 @@ following macros:
 #+begin_src C
 double hook(double a, double b) {
     /* Call original ignoring return */
-    CALL_ORIGINAL(&detour_ctx, orig, a, b);
+    DETOUR_ORIG_CALL(&detour_ctx, orig, a, b);
 
     /* Store return value in variable */
     int result;
-    GET_ORIGINAL(&detour_ctx, result, orig, a, b);
+    DETOUR_ORIG_GET(&detour_ctx, result, orig, a, b);
 
     /* Our hook can overwrite the return value */
     return 123;
