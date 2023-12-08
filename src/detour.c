@@ -41,11 +41,11 @@ static bool protect_addr(void* ptr, int new_flags) {
  */
 #ifdef __i386__
 static uint8_t def_jmp_bytes[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
-#define JMP_BYTES_PTR 1 /* Offset inside the array where the ptr should go */
+#define JMP_BYTES_OFF 1 /* Offset inside the array where the ptr should go */
 #else
 static uint8_t def_jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
                                    0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
-#define JMP_BYTES_PTR 2 /* Offset inside the array where the ptr should go */
+#define JMP_BYTES_OFF 2 /* Offset inside the array where the ptr should go */
 #endif
 
 void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
@@ -60,11 +60,11 @@ void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
     /* Default jmp bytes */
     memcpy(ctx->jmp_bytes, &def_jmp_bytes, sizeof(def_jmp_bytes));
 
-    /* JMP_BYTES_PTR is defined bellow def_jmp_bytes, and it changes depending
+    /* JMP_BYTES_OFF is defined bellow def_jmp_bytes, and it changes depending
      * on the arch.
      * We use "&hook" and not "hook" because we want the address of
      * the func, not the first bytes of it like before. */
-    memcpy(&ctx->jmp_bytes[JMP_BYTES_PTR], &hook, sizeof(detour_ptr_t));
+    memcpy(&ctx->jmp_bytes[JMP_BYTES_OFF], &hook, sizeof(detour_ptr_t));
 }
 
 bool detour_add(detour_ctx_t* ctx) {
