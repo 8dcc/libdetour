@@ -6,14 +6,11 @@ LDFLAGS=
 OBJS=obj/main.c.o obj/detour.c.o
 BIN=detour-test.out
 
-.PHONY: clean all run flags-32bit all-32bit
+.PHONY: clean all flags-32bit all-32bit
 
 # -------------------------------------------
 
 all: $(BIN)
-
-run: $(BIN)
-	./$<
 
 clean:
 	rm -f $(OBJS)
