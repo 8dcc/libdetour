@@ -1,7 +1,7 @@
 /**
- * @file      detour.c
- * @brief     Detour hooking library source
- * @author    8dcc
+ * @file   detour.c
+ * @brief  Detour hooking library source
+ * @author 8dcc
  *
  * https://github.com/8dcc/detour-lib
  */
@@ -12,18 +12,18 @@
 #include <unistd.h>   /* getpagesize */
 #include <sys/mman.h> /* mprotect */
 
-#include "detour.h" /* Remember to change this if you move the header */
+/* NOTE: Remember to change this if you move the header */
+#include "detour.h"
 
-#define PAGE_SIZE          getpagesize()
 #define PAGE_MASK          (~(PAGE_SIZE - 1))
 #define PAGE_ALIGN(x)      ((x + PAGE_SIZE - 1) & PAGE_MASK)
 #define PAGE_ALIGN_DOWN(x) (PAGE_ALIGN(x) - PAGE_SIZE)
 
 static bool protect_addr(void* ptr, int new_flags) {
+    const int PAGE_SIZE = getpagesize();
     void* p  = (void*)PAGE_ALIGN_DOWN((detour_ptr_t)ptr);
-    int pgsz = getpagesize();
 
-    if (mprotect(p, pgsz, new_flags) == -1)
+    if (mprotect(p, PAGE_SIZE, new_flags) == -1)
         return false;
 
     return true;
@@ -31,12 +31,12 @@ static bool protect_addr(void* ptr, int new_flags) {
 
 /*
  * 64 bits:
- *   0:  48 b8 45 55 46 84 45    movabs rax,0x454584465545
- *   7:  45 00 00
+ *   0:  48 b8 88 77 66 55 44    movabs rax, 0x1122334455667788
+ *   7:  33 22 11
  *   a:  ff e0                   jmp    rax
  *
  * 32 bits:
- *   0:  b8 01 00 00 00          mov    eax,0x1
+ *   0:  b8 44 33 22 11          mov    eax, 0x11223344
  *   5:  ff e0                   jmp    eax
  */
 #ifdef __i386__
