@@ -9,6 +9,8 @@
 #ifndef DETOUR_H_
 #define DETOUR_H_ 1
 
+#include <stdint.h>
+
 #ifdef __i386__
 #define JMP_SZ_ 7 /* Size of jmp instructions in 32bit */
 #else
