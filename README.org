@@ -10,18 +10,20 @@
 
 * Description
 
+This library is for detour hooking. For more information on how it works, check
+out my [[https://8dcc.github.io/programming/detour-hooking.html][blog entry]]. It supports x64 and x86 architectures.
+
 This is a linux library, but it should be easy to port to windows. As far as I
 know, you should only need to change the [[https://github.com/8dcc/detour-lib/blob/f171e7fcb0e10eeb04c942c6f004a2fea75c7b2c/src/detour.c#L18-L30][protect_addr]] function.
-
-It supports x64 and x86.
 
 If you want to use this library, simply copy the detour source and headers to
 your project, include the header in your source files and compile the detour
 source with the rest of your code. Please see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]] and [[*Usage][Usage]] for an
 example on how to use it.
 
-This library was originally made for [[https://github.com/8dcc/hl-cheat][8dcc/hl-cheat]], and was inspired by
-[[https://guidedhacking.com/threads/simple-linux-windows-detour-class.10580/][this OOP abomination]] ([[https://gist.github.com/8dcc/d0cbef32cd46ab9c73c6f830fa71d999][mirror]]).
+This library was originally made for [[https://github.com/8dcc/hl-cheat][8dcc/hl-cheat]], but I ended up using it in
+multiple projects (like [[https://github.com/8dcc/devildaggers-re][8dcc/devildaggers-re]]). It was inspired by [[https://guidedhacking.com/threads/simple-linux-windows-detour-class.10580/][this OOP
+abomination]] ([[https://gist.github.com/8dcc/d0cbef32cd46ab9c73c6f830fa71d999][mirror]]).
 
 * Building
 
@@ -31,6 +33,22 @@ $ cd detour-lib
 $ make
 ...
 #+end_src
+
+* Performance
+
+Because of its simplicity, this library is really fast. Other hooking methods
+like VMT hooking have basically zero performance impact by design, but their use
+case is way more specific.
+
+First, a note about compiler optimizations. This library works fine in projects
+compiled with =-O2= and =-O3=, but because all the functions in this example are
+inside =main.c=, the compiler optimizes the calls so the hooking never occurs.
+This can be proven by moving the =foo()= and =hook()= functions to a separate
+source, so the compiler can't optimize the calls when compiling =main.c=.
+
+The library only needs to enable write permissions for the memory region of the
+function, write 7 or 12 bytes (x86/x64) and remove the write permission. All
+this is explained in more detail in the article I linked above.
 
 * Usage
 
