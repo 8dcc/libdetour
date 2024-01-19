@@ -14,11 +14,11 @@ This library is for detour hooking. For more information on how it works, check
 out my [[https://8dcc.github.io/programming/detour-hooking.html][blog entry]]. It supports x64 and x86 architectures.
 
 This is a linux library, but it should be easy to port to windows. As far as I
-know, you should only need to change the [[https://github.com/8dcc/detour-lib/blob/f171e7fcb0e10eeb04c942c6f004a2fea75c7b2c/src/detour.c#L18-L30][protect_addr]] function.
+know, you should only need to change the [[https://github.com/8dcc/detour-lib/blob/40f7a8c46b018cd676d04908a0fcc5b679a87740/src/detour.c#L18-L30][protect_addr]] function.
 
 If you want to use this library, simply copy the detour source and headers to
 your project, include the header in your source files and compile the detour
-source with the rest of your code. Please see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]] and [[*Usage][Usage]] for an
+source with the rest of your code. Please see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]] and [[Usage]] for an
 example on how to use it.
 
 This library was originally made for [[https://github.com/8dcc/hl-cheat][8dcc/hl-cheat]], but I ended up using it in
@@ -110,5 +110,5 @@ detour_del(&detour_ctx);
 
 If we call =orig()= again, our hook function will not be called.
 
-For a full working example, see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]]. You can also run =make all= or =make
-all-32bit=, and try executing =detour-test.out=.
+For a full working example, see [[https://github.com/8dcc/detour-lib/blob/main/src/main.c][src/main.c]]. You can also run =make all= or
+=make all-32bit=, and try executing =detour-test.out=.
