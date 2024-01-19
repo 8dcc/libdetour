@@ -13,17 +13,17 @@
 #include <stdbool.h>
 
 #ifdef __i386__
-#define JMP_SZ_ 7 /* Size of jmp instructions in 32bit */
+#define DETOUR_JMP_SZ_ 7 /* Size of jmp instructions in 32-bit */
 #else
-#define JMP_SZ_ 12 /* Size of jmp instructions in 64bit */
+#define DETOUR_JMP_SZ_ 12 /* Size of jmp instructions in 64-bit */
 #endif
 
 typedef struct {
     bool detoured;
     void* orig;
     void* hook;
-    uint8_t jmp_bytes[JMP_SZ_];
-    uint8_t saved_bytes[JMP_SZ_];
+    uint8_t jmp_bytes[DETOUR_JMP_SZ_];
+    uint8_t saved_bytes[DETOUR_JMP_SZ_];
 } detour_ctx_t;
 
 /*----------------------------------------------------------------------------*/
