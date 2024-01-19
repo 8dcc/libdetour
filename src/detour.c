@@ -80,12 +80,11 @@ bool detour_add(detour_ctx_t* ctx) {
     memcpy(ctx->orig, ctx->jmp_bytes, sizeof(ctx->jmp_bytes));
 
     /* Restore old protection */
-    if (protect_addr(ctx->orig, PROT_READ | PROT_EXEC)) {
-        ctx->detoured = true;
-        return true;
-    }
+    if (!protect_addr(ctx->orig, PROT_READ | PROT_EXEC))
+        return false;
 
-    return false;
+    ctx->detoured = true;
+    return true;
 }
 
 bool detour_del(detour_ctx_t* ctx) {
@@ -101,10 +100,9 @@ bool detour_del(detour_ctx_t* ctx) {
     memcpy(ctx->orig, ctx->saved_bytes, sizeof(ctx->saved_bytes));
 
     /* Restore old protection */
-    if (protect_addr(ctx->orig, PROT_READ | PROT_EXEC)) {
-        ctx->detoured = false;
-        return true;
-    }
+    if (!protect_addr(ctx->orig, PROT_READ | PROT_EXEC))
+        return false;
 
-    return false;
+    ctx->detoured = false;
+    return true;
 }
