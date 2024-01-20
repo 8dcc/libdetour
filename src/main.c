@@ -46,8 +46,8 @@ double hook(double a, double b) {
 
 int main(void) {
     double returned;
-    void* orig_ptr = &foo;
-    void* hook_ptr = &hook;
+    void* orig_ptr = (void*)&foo;
+    void* hook_ptr = (void*)&hook;
 
     /* Initialize context */
     detour_init(&detour_ctx, orig_ptr, hook_ptr);
