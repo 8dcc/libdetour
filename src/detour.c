@@ -6,7 +6,7 @@
  * https://github.com/8dcc/detour-lib
  */
 
-#ifdef __unix__
+#ifndef __unix__
 #error "detour-lib: Non-unix systems are not supported"
 #endif
 
