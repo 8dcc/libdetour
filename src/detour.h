@@ -36,7 +36,7 @@ bool detour_del(detour_ctx_t* ctx);
 
 /* Declare the prototype of the original function */
 #define DETOUR_DECL_TYPE(FUNCRET, FUNCNAME, ...) \
-    typedef FUNCRET (*detour_##FUNCNAME##_t)(__VA_ARGS__);
+    typedef FUNCRET (*detour_##FUNCNAME##_t)(__VA_ARGS__)
 
 /* Remove detour hook, call original, detour again.
  * Keep in mind that:
