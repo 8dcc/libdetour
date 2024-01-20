@@ -6,11 +6,15 @@
  * https://github.com/8dcc/detour-lib
  */
 
+#ifdef __unix__
+#error "detour-lib: Non-unix systems are not supported"
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>   /* getpagesize */
-#include <sys/mman.h> /* mprotect */
+#include <unistd.h>   /* sysconf() */
+#include <sys/mman.h> /* mprotect() */
 
 /* NOTE: Remember to change this if you move the header */
 #include "detour.h"
@@ -20,7 +24,7 @@
 #define PAGE_ALIGN_DOWN(X) (PAGE_ALIGN(X) - PAGE_SIZE)
 
 static bool protect_addr(void* ptr, int new_flags) {
-    int PAGE_SIZE = getpagesize();
+    int PAGE_SIZE = sysconf(_SC_PAGESIZE);
     void* page    = (void*)PAGE_ALIGN_DOWN(ptr);
 
     if (mprotect(page, PAGE_SIZE, new_flags) == -1)
