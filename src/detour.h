@@ -3,7 +3,7 @@
  * @brief  Detour hooking library header
  * @author 8dcc
  *
- * https://github.com/8dcc/detour-lib
+ * https://github.com/8dcc/libdetour
  */
 
 #ifndef DETOUR_H_

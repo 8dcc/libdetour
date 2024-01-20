@@ -3,7 +3,7 @@ CC=gcc
 CFLAGS=-Wall -Wextra
 LDFLAGS=
 
-OBJ_FILES=main.c.o detour.c.o
+OBJ_FILES=main.c.o libdetour.c.o
 OBJS=$(addprefix obj/, $(OBJ_FILES))
 
 BIN=detour-test.out

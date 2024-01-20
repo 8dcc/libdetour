@@ -1,13 +1,13 @@
 /**
- * @file   detour.c
+ * @file   libdetour.c
  * @brief  Detour hooking library source
  * @author 8dcc
  *
- * https://github.com/8dcc/detour-lib
+ * https://github.com/8dcc/libdetour
  */
 
 #ifndef __unix__
-#error "detour-lib: Non-unix systems are not supported"
+#error "libdetour: Non-unix systems are not supported"
 #endif
 
 #include <stdint.h>
