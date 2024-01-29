@@ -19,15 +19,14 @@
 /* NOTE: Remember to change this if you move the header */
 #include "detour.h"
 
-#define PAGE_MASK          (~(PAGE_SIZE - 1))
-#define PAGE_ALIGN(X)      (((uintptr_t)(X) + PAGE_SIZE - 1) & PAGE_MASK)
-#define PAGE_ALIGN_DOWN(X) (PAGE_ALIGN(X) - PAGE_SIZE)
-
 static bool protect_addr(void* ptr, int new_flags) {
-    int PAGE_SIZE = sysconf(_SC_PAGESIZE);
-    void* page    = (void*)PAGE_ALIGN_DOWN(ptr);
+    long page_size      = sysconf(_SC_PAGESIZE);
+    long page_mask      = ~(page_size - 1);
+    uintptr_t next_page = ((uintptr_t)ptr + page_size - 1) & page_mask;
+    uintptr_t prev_page = next_page - page_size;
+    void* page          = (void*)prev_page;
 
-    if (mprotect(page, PAGE_SIZE, new_flags) == -1)
+    if (mprotect(page, page_size, new_flags) == -1)
         return false;
 
     return true;
