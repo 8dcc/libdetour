@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+/*----------------------------------------------------------------------------*/
+
 /*
  * 64 bits:
  *   0:  48 b8 88 77 66 55 44    movabs rax, 0x1122334455667788
@@ -31,6 +33,8 @@ static uint8_t def_jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
                                    0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
 #define JMP_BYTES_OFF 2 /* Offset inside the array where the ptr should go */
 #endif
+
+/*----------------------------------------------------------------------------*/
 
 #ifdef __unix__
 #include <unistd.h>   /* sysconf() */
@@ -53,17 +57,18 @@ static bool protect_addr(void* ptr, bool enable_write) {
     return true;
 }
 #elif defined _WIN32
-#include <memoryapi.h>   /* VirtualProtect */
+#include <Windows.h> /* VirtualProtect */
 
 static bool protect_addr(void* ptr, bool enable_write) {
-    uint32_t old_flags;
-    uint32_t new_flags =
-      enable_write ? PAGE_EXECUTE_READWRITE : PAGE_EXECUTE_READ;
-    return !VirtualProtect(ptr, sizeof(def_jmp_bytes), new_flags, &old_flags);
+    DWORD old_flags;
+    DWORD new_flags = enable_write ? PAGE_EXECUTE_READWRITE : PAGE_EXECUTE_READ;
+    return VirtualProtect(ptr, sizeof(def_jmp_bytes), new_flags, &old_flags);
 }
 #else
 #error "libdetour: This systems is not supported"
 #endif
+
+/*----------------------------------------------------------------------------*/
 
 void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
     ctx->detoured = false;
