@@ -6,31 +6,14 @@
  * https://github.com/8dcc/libdetour
  */
 
-#ifndef __unix__
-#error "libdetour: Non-unix systems are not supported"
-#endif
+/* NOTE: Remember to change this if you move the header */
+#include "detour.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>   /* sysconf() */
-#include <sys/mman.h> /* mprotect() */
 
-/* NOTE: Remember to change this if you move the header */
-#include "detour.h"
-
-static bool protect_addr(void* ptr, int new_flags) {
-    long page_size      = sysconf(_SC_PAGESIZE);
-    long page_mask      = ~(page_size - 1);
-    uintptr_t next_page = ((uintptr_t)ptr + page_size - 1) & page_mask;
-    uintptr_t prev_page = next_page - page_size;
-    void* page          = (void*)prev_page;
-
-    if (mprotect(page, page_size, new_flags) == -1)
-        return false;
-
-    return true;
-}
+/*----------------------------------------------------------------------------*/
 
 /*
  * 64 bits:
@@ -50,6 +33,42 @@ static uint8_t def_jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
                                    0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
 #define JMP_BYTES_OFF 2 /* Offset inside the array where the ptr should go */
 #endif
+
+/*----------------------------------------------------------------------------*/
+
+#ifdef __unix__
+#include <unistd.h>   /* sysconf() */
+#include <sys/mman.h> /* mprotect() */
+
+static bool protect_addr(void* ptr, bool enable_write) {
+    long page_size      = sysconf(_SC_PAGESIZE);
+    long page_mask      = ~(page_size - 1);
+    uintptr_t next_page = ((uintptr_t)ptr + page_size - 1) & page_mask;
+    uintptr_t prev_page = next_page - page_size;
+    void* page          = (void*)prev_page;
+
+    uint32_t new_flags = PROT_READ | PROT_EXEC;
+    if (enable_write)
+        new_flags |= PROT_WRITE;
+
+    if (mprotect(page, page_size, new_flags) == -1)
+        return false;
+
+    return true;
+}
+#elif defined _WIN32
+#include <Windows.h> /* VirtualProtect */
+
+static bool protect_addr(void* ptr, bool enable_write) {
+    DWORD old_flags;
+    DWORD new_flags = enable_write ? PAGE_EXECUTE_READWRITE : PAGE_EXECUTE_READ;
+    return VirtualProtect(ptr, sizeof(def_jmp_bytes), new_flags, &old_flags);
+}
+#else
+#error "libdetour: This systems is not supported"
+#endif
+
+/*----------------------------------------------------------------------------*/
 
 void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
     ctx->detoured = false;
@@ -76,14 +95,14 @@ bool detour_add(detour_ctx_t* ctx) {
         return true;
 
     /* See util.c */
-    if (!protect_addr(ctx->orig, PROT_READ | PROT_WRITE | PROT_EXEC))
+    if (!protect_addr(ctx->orig, true))
         return false;
 
     /* Copy our jmp instruction with our hook address to the orig */
     memcpy(ctx->orig, ctx->jmp_bytes, sizeof(ctx->jmp_bytes));
 
     /* Restore old protection */
-    if (!protect_addr(ctx->orig, PROT_READ | PROT_EXEC))
+    if (!protect_addr(ctx->orig, false))
         return false;
 
     ctx->detoured = true;
@@ -96,14 +115,14 @@ bool detour_del(detour_ctx_t* ctx) {
         return true;
 
     /* See util.c */
-    if (!protect_addr(ctx->orig, PROT_READ | PROT_WRITE | PROT_EXEC))
+    if (!protect_addr(ctx->orig, true))
         return false;
 
     /* Restore the bytes that were at the start of orig (we saved on init) */
     memcpy(ctx->orig, ctx->saved_bytes, sizeof(ctx->saved_bytes));
 
     /* Restore old protection */
-    if (!protect_addr(ctx->orig, PROT_READ | PROT_EXEC))
+    if (!protect_addr(ctx->orig, false))
         return false;
 
     ctx->detoured = false;

@@ -4,7 +4,7 @@
 #+export_file_name: ./doc/README.md
 #+author: 8dcc
 
-*Simple C/C++ library for detour hooking in linux.*
+*Simple C/C++ library for detour hooking in linux and windows.*
 
 #+TOC: headlines 2
 
@@ -13,9 +13,8 @@
 This library is for detour hooking. For more information on how it works, check
 out my [[https://8dcc.github.io/programming/detour-hooking.html][blog entry]]. It supports x64 and x86 architectures.
 
-Currently this library is for unix-like systems, but it should be easy to port
-to windows. As far as I know, you should only need to change the [[https://github.com/8dcc/libdetour/blob/40f7a8c46b018cd676d04908a0fcc5b679a87740/src/detour.c#L18-L30][protect_addr]]
-function. Feel free to [[https://github.com/8dcc/libdetour/pulls][submit a PR]] if you want to add this.
+Currently, this library supports both windows and unix-like systems, since the
+only OS-specific function is =protect_addr()=.
 
 This library was originally made for [[https://github.com/8dcc/hl-cheat][8dcc/hl-cheat]], but I ended up using it in
 multiple projects (like [[https://github.com/8dcc/devildaggers-re][8dcc/devildaggers-re]]). It was inspired by [[https://guidedhacking.com/threads/simple-linux-windows-detour-class.10580/][this OOP
