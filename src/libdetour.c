@@ -70,7 +70,7 @@ static bool protect_addr(void* ptr, bool enable_write) {
 
 /*----------------------------------------------------------------------------*/
 
-void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
+void libdetour_init(libdetour_ctx_t* ctx, void* orig, void* hook) {
     ctx->detoured = false;
     ctx->orig     = orig;
     ctx->hook     = hook;
@@ -89,7 +89,7 @@ void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
     memcpy(&ctx->jmp_bytes[JMP_BYTES_OFF], &hook, sizeof(void*));
 }
 
-bool detour_add(detour_ctx_t* ctx) {
+bool libdetour_add(libdetour_ctx_t* ctx) {
     /* Already detoured, nothing to do */
     if (ctx->detoured)
         return true;
@@ -109,7 +109,7 @@ bool detour_add(detour_ctx_t* ctx) {
     return true;
 }
 
-bool detour_del(detour_ctx_t* ctx) {
+bool libdetour_del(libdetour_ctx_t* ctx) {
     /* Not detoured, nothing to do */
     if (!ctx->detoured)
         return true;
