@@ -7,7 +7,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "detour.h"
+
+#include "libdetour.h"
 
 /* Here we asociate the return type and arguments for the function `foo'. This
  * macro will create a `typedef' that will be used internally by the macros. */

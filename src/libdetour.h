@@ -1,5 +1,5 @@
 /**
- * @file   detour.h
+ * @file   libdetour.h
  * @brief  Detour hooking library header
  * @author 8dcc
  *

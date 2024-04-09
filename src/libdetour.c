@@ -7,7 +7,7 @@
  */
 
 /* NOTE: Remember to change this if you move the header */
-#include "detour.h"
+#include "libdetour.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -16,14 +16,14 @@
 /*----------------------------------------------------------------------------*/
 
 /*
+ * 32 bits:
+ *   0:  b8 44 33 22 11          mov    eax, 0x11223344
+ *   5:  ff e0                   jmp    eax
+ *
  * 64 bits:
  *   0:  48 b8 88 77 66 55 44    movabs rax, 0x1122334455667788
  *   7:  33 22 11
  *   a:  ff e0                   jmp    rax
- *
- * 32 bits:
- *   0:  b8 44 33 22 11          mov    eax, 0x11223344
- *   5:  ff e0                   jmp    eax
  */
 #ifdef __i386__
 static uint8_t def_jmp_bytes[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
@@ -57,7 +57,7 @@ static bool protect_addr(void* ptr, bool enable_write) {
     return true;
 }
 #elif defined _WIN32
-#include <Windows.h> /* VirtualProtect */
+#include <Windows.h> /* VirtualProtect() */
 
 static bool protect_addr(void* ptr, bool enable_write) {
     DWORD old_flags;

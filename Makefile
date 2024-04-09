@@ -5,7 +5,7 @@ CFLAGS=-Wall -Wextra
 OBJ_FILES=main.c.o libdetour.c.o
 OBJS=$(addprefix obj/, $(OBJ_FILES))
 
-BIN=detour-test.out
+BIN=libdetour-test.out
 
 #-------------------------------------------------------------------------------
 
@@ -31,4 +31,3 @@ $(BIN): $(OBJS)
 obj/%.c.o : src/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $<
-
