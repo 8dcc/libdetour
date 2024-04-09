@@ -49,7 +49,7 @@ If you want to try the example, simply run:
 $ git clone https://github.com/8dcc/libdetour
 $ cd libdetour
 $ make
-$ ./detour-test.out
+$ ./libdetour-test.out
 main: hooked, calling foo...
 hook: got values 5.0 and 2.0
 hook: calling original with custom values...
@@ -68,62 +68,63 @@ main: unhooked foo returned 14.0
 * Usage
 
 First, you will need to specify the type and arguments of the original function
-with the =DETOUR_DECL_TYPE= macro. You will also need to declare a =detour_ctx_t=
-context struct:
+with the =LIBDETOUR_DECL_TYPE= macro. You will also need to declare a
+=libdetour_ctx_t= context struct:
 
 #+begin_src C
 /* int orig(double a, double b); */
-DETOUR_DECL_TYPE(int, orig, double, double);
+LIBDETOUR_DECL_TYPE(int, orig, double, double);
 
-detour_ctx_t detour_ctx;
+libdetour_ctx_t detour_ctx;
 #+end_src
 
 This macro will =typedef= a type needed internally by the library, so make sure
 you call it globally. The context struct should be accesible when calling the
 original function (e.g. from your hook), so keep that in mind as well.
 
-Then, initialize the context struct by calling =detour_init= with a pointer to the
-original function and a pointer to your hook function:
+Then, initialize the context struct by calling =libdetour_init= with a pointer to
+the original function and a pointer to your hook function:
 
 #+begin_src C
 void* orig_ptr = &orig; /* orig(...) */
 void* hook_ptr = &hook; /* hook(...) */
 
-/* Initialize the detour context */
-detour_init(&detour_ctx, orig_ptr, hook_ptr);
+/* Initialize the libdetour context */
+libdetour_init(&detour_ctx, orig_ptr, hook_ptr);
 
 /* Hook the original function */
-detour_add(&detour_ctx);
+libdetour_add(&detour_ctx);
 #+end_src
 
 If you want to call the original function from your hook, you can use one of the
 following macros:
 
-- =DETOUR_ORIG_CALL=: Calls the original function, ignores the returned value.
-- =DETOUR_ORIG_GET=: Takes an extra parameter used for storing the return value.
+- =LIBDETOUR_ORIG_CALL=: Calls the original function, ignores the returned value.
+- =LIBDETOUR_ORIG_GET=: Takes an extra parameter used for storing the return
+  value.
 
 #+begin_src C
 double hook(double a, double b) {
     /* Call original ignoring return */
-    DETOUR_ORIG_CALL(&detour_ctx, orig, a, b);
+    LIBDETOUR_ORIG_CALL(&detour_ctx, orig, a, b);
 
     /* Store return value in variable */
     double result;
-    DETOUR_ORIG_GET(&detour_ctx, result, orig, a, b);
+    LIBDETOUR_ORIG_GET(&detour_ctx, result, orig, a, b);
 
     /* Our hook can overwrite the return value */
     return 123.0;
 }
 #+end_src
 
-Once we are done, we can call =detour_del= to remove the hook:
+Once we are done, we can call =libdetour_del= to remove the hook:
 
 #+begin_src C
 /* Remove hook */
-detour_del(&detour_ctx);
+libdetour_del(&detour_ctx);
 #+end_src
 
 If we call =orig()= again, our hook function will not be called.
 
 For a full working example, see [[https://github.com/8dcc/libdetour/blob/main/src/main.c][src/main.c]]. You can also run =make all= or
-=make all-32bit=, and try executing =detour-test.out=.
+=make all-32bit=, and try executing =libdetour-test.out=.
