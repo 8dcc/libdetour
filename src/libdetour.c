@@ -41,6 +41,8 @@ static uint8_t def_jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
 #include <sys/mman.h> /* mprotect() */
 
 static bool protect_addr(void* ptr, bool enable_write) {
+    /* For more information, see:
+     * https://8dcc.github.io/reversing/challenge10.html#c-translation */
     long page_size      = sysconf(_SC_PAGESIZE);
     long page_mask      = ~(page_size - 1);
     uintptr_t next_page = ((uintptr_t)ptr + page_size - 1) & page_mask;
