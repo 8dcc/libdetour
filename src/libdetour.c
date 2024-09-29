@@ -95,7 +95,7 @@ void libdetour_init(libdetour_ctx_t* ctx, void* orig, void* hook) {
     /* Default jmp bytes */
     memcpy(ctx->jmp_bytes, &def_jmp_bytes, sizeof(def_jmp_bytes));
 
-    /* JMP_BYTES_OFF is defined bellow def_jmp_bytes, and it changes depending
+    /* JMP_BYTES_OFF is defined below def_jmp_bytes, and it changes depending
      * on the arch.
      * We use "&hook" and not "hook" because we want the address of
      * the func, not the first bytes of it like before. */
