@@ -1,33 +1,31 @@
 
 CC=gcc
-CFLAGS=-Wall -Wextra
+CFLAGS=-std=c99 -Wall -Wextra
 
-OBJ_FILES=main.c.o libdetour.c.o
-OBJS=$(addprefix obj/, $(OBJ_FILES))
+SRC=main.c libdetour.c
+OBJ=$(addprefix obj/, $(addsuffix .o, $(SRC)))
 
 BIN=libdetour-test.out
 
 #-------------------------------------------------------------------------------
 
-.PHONY: all clean flags-32bit all-32bit
+.PHONY: all all-32bit flags-32bit clean
 
 all: $(BIN)
+all-32bit: flags-32bit all
 
-clean:
-	rm -f $(OBJS)
-	rm -f $(BIN)
-
-# Add -m32 for x86 systems stuff
 flags-32bit:
 	$(eval CFLAGS += -m32)
 
-all-32bit: flags-32bit all
+clean:
+	rm -f $(OBJ)
+	rm -f $(BIN)
 
 #-------------------------------------------------------------------------------
 
-$(BIN): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS)
+%.out: $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 
 obj/%.c.o : src/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -o $@ -c $<
