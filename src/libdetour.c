@@ -1,6 +1,7 @@
 /*
  * libdetour.c - Simple C/C++ library for detour hooking in Linux and Windows.
  * See: https://github.com/8dcc/libdetour
+ *
  * Copyright (C) 2024 8dcc
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -22,7 +23,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
+#include <string.h> /* memcpy() */
 
 /*----------------------------------------------------------------------------*/
 
@@ -37,84 +38,94 @@
  *   a:  ff e0                   jmp    rax
  */
 #ifdef __i386__
-static uint8_t def_jmp_bytes[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
+static uint8_t jmp_bytes[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
 #define JMP_BYTES_OFF 1 /* Offset inside the array where the ptr should go */
 #else
-static uint8_t def_jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
-                                   0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
+static uint8_t jmp_bytes[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0 };
 #define JMP_BYTES_OFF 2 /* Offset inside the array where the ptr should go */
 #endif
 
 /*----------------------------------------------------------------------------*/
 
-#ifdef __unix__
+#if defined(__unix__)
 #include <unistd.h>   /* sysconf() */
 #include <sys/mman.h> /* mprotect() */
 
 static bool protect_addr(void* ptr, bool enable_write) {
-    /* For more information, see:
-     * https://8dcc.github.io/reversing/challenge10.html#c-translation */
-    long page_size      = sysconf(_SC_PAGESIZE);
-    long page_mask      = ~(page_size - 1);
-    uintptr_t next_page = ((uintptr_t)ptr + page_size - 1) & page_mask;
-    uintptr_t prev_page = next_page - page_size;
-    void* page          = (void*)prev_page;
+    /*
+     * For more information, see:
+     * https://8dcc.github.io/reversing/challenge10.html#c-translation
+     */
+    const long page_size      = sysconf(_SC_PAGESIZE);
+    const long page_mask      = ~(page_size - 1);
+    const uintptr_t next_page = ((uintptr_t)ptr + page_size - 1) & page_mask;
+    void* prev_page           = (void*)(next_page - page_size);
 
     uint32_t new_flags = PROT_READ | PROT_EXEC;
     if (enable_write)
         new_flags |= PROT_WRITE;
 
-    if (mprotect(page, page_size, new_flags) == -1)
+    if (mprotect(prev_page, page_size, new_flags) == -1)
         return false;
 
     return true;
 }
-#elif defined _WIN32
-#include <Windows.h> /* VirtualProtect() */
+#elif defined(_WIN32) /* !defined(__unix__) */
+#include <windows.h>  /* VirtualProtect() */
 
 static bool protect_addr(void* ptr, bool enable_write) {
     DWORD old_flags;
     DWORD new_flags = enable_write ? PAGE_EXECUTE_READWRITE : PAGE_EXECUTE_READ;
-    return VirtualProtect(ptr, sizeof(def_jmp_bytes), new_flags, &old_flags);
+    return VirtualProtect(ptr, sizeof(jmp_bytes), new_flags, &old_flags);
 }
-#else
+#else                 /* !defined(_WIN32) */
 #error "libdetour: This systems is not supported"
-#endif
+#endif /* !defined(_WIN32) */
 
 /*----------------------------------------------------------------------------*/
 
-void libdetour_init(libdetour_ctx_t* ctx, void* orig, void* hook) {
+void detour_init(detour_ctx_t* ctx, void* orig, void* hook) {
     ctx->detoured = false;
     ctx->orig     = orig;
     ctx->hook     = hook;
 
-    /* Store the first N bytes of the original function, where N is the size of
-     * the jmp instructions */
+    /*
+     * Store the first N bytes of the original function, where N is the size of
+     * the `jmp' instructions.
+     */
     memcpy(ctx->saved_bytes, orig, sizeof(ctx->saved_bytes));
-
-    /* Default jmp bytes */
-    memcpy(ctx->jmp_bytes, &def_jmp_bytes, sizeof(def_jmp_bytes));
-
-    /* JMP_BYTES_OFF is defined below def_jmp_bytes, and it changes depending
-     * on the arch.
-     * We use "&hook" and not "hook" because we want the address of
-     * the func, not the first bytes of it like before. */
-    memcpy(&ctx->jmp_bytes[JMP_BYTES_OFF], &hook, sizeof(void*));
 }
 
-bool libdetour_add(libdetour_ctx_t* ctx) {
-    /* Already detoured, nothing to do */
+bool detour_enable(detour_ctx_t* ctx) {
     if (ctx->detoured)
         return true;
 
-    /* See util.c */
+    /*
+     * Enable write permissions on the specified address. The `protect_addr'
+     * function is defined above as a static function, depending on the current
+     * OS.
+     */
     if (!protect_addr(ctx->orig, true))
         return false;
 
-    /* Copy our jmp instruction with our hook address to the orig */
-    memcpy(ctx->orig, ctx->jmp_bytes, sizeof(ctx->jmp_bytes));
+    /*
+     * Write the address of the `hook' function to the array for the encoded
+     * `jmp' instruction, at the `JMP_BYTES_OFF' offset (which changes depending
+     * on the architecture at compile-time).
+     */
+    memcpy(&jmp_bytes[JMP_BYTES_OFF], &(ctx->hook), sizeof(void*));
 
-    /* Restore old protection */
+    /*
+     * Copy the whole (now filled) `jmp_bytes' array to the start of the body
+     * the target function (`ctx->orig'). This new `jmp' instruction will be
+     * responsible for the actual hook.
+     */
+    memcpy(ctx->orig, jmp_bytes, sizeof(jmp_bytes));
+
+    /*
+     * Restore the old protection for this address.
+     */
     if (!protect_addr(ctx->orig, false))
         return false;
 
@@ -122,19 +133,22 @@ bool libdetour_add(libdetour_ctx_t* ctx) {
     return true;
 }
 
-bool libdetour_del(libdetour_ctx_t* ctx) {
-    /* Not detoured, nothing to do */
+bool detour_disable(detour_ctx_t* ctx) {
     if (!ctx->detoured)
         return true;
 
-    /* See util.c */
+    /*
+     * See `detour_enable'.
+     */
     if (!protect_addr(ctx->orig, true))
         return false;
 
-    /* Restore the bytes that were at the start of orig (we saved on init) */
+    /*
+     * Restore the bytes we saved inside the `detour_ctx_t' structure in
+     * `detour_init'.
+     */
     memcpy(ctx->orig, ctx->saved_bytes, sizeof(ctx->saved_bytes));
 
-    /* Restore old protection */
     if (!protect_addr(ctx->orig, false))
         return false;
 
